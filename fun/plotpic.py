@@ -29,7 +29,7 @@ def show_the_fen(g,l,v,popt):
 # 拟合曲线绘制
 def plot_fit_line(x,g,l,v,popt,sub = True):
     xfit = np.linspace(x.min(),x.max(),5000)
-    yfit = fit_function(xfit,g,l,v,'',popt)
+    yfit = fit_function(xfit,g,l,v,'none',popt)
     plt.plot(xfit,yfit,linewidth=fit_line_width,color = fit_line_color)
     # 绘制分峰
     if sub:
@@ -51,19 +51,18 @@ def plot_fit_line(x,g,l,v,popt,sub = True):
             plt.plot(xfit,yfit4,linewidth=fit_subline_width[2][i%len(fit_subline_width[2])],\
                      linestyle=fit_subline_style[2][i%len(fit_subline_style[2])],\
                      color=fit_subline_color[2][i%len(fit_subline_color[2])])
+    return max(yfit) - min(yfit)*0.9
 
-
-def ready_to_show():
-    x_major_locator=MultipleLocator(10)#准备刻度
+def ready_to_show(x):
+    #(x.max() - x.min())/10
+    x_major_locator=MultipleLocator((x.max() - x.min())/10)#准备刻度
     #标签
-    plt.xlabel('wavenumber',fontdict={'family' : 'Times New Roman', 'size'   : 29})
-    plt.ylabel('intensity(arb.units)',fontdict={'family' : 'Times New Roman', 'size'   : 29})
+    plt.xlabel(x_label,fontdict={'family' : 'Times New Roman', 'size'   : 29})
+    plt.ylabel(y_label,fontdict={'family' : 'Times New Roman', 'size'   : 29})
     ax=plt.gca()
     ax.xaxis.set_major_locator(x_major_locator)         #画刻度
-    plt.xlim(0,120)
+    #plt.xlim(0,120)
     plt.grid(axis='x',linestyle='-.')                   #画竖线
-    #plt.text(100,80,'atm',ha = 'center',va = 'bottom',fontsize=7)#加标签
-    #ax.set_yticks([])#隐藏y轴刻度
     plt.yticks(fontproperties = 'Times New Roman', size = 23)
     plt.xticks(fontproperties = 'Times New Roman', size = 23)
     plt.show()                         #展示

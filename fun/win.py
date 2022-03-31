@@ -6,6 +6,7 @@ from fitcures import *
 from plotpic import *
 from subfunction import *
 
+
 class verification_window(tk.Frame):
 
     # 调用时初始化
@@ -13,12 +14,18 @@ class verification_window(tk.Frame):
         global root
         root = tk.Tk()
         root.resizable(width=False, height=False)
-        root.iconbitmap(default = 'Rs.ico')
-        root.title("拉曼拟合1.0")
+        try:
+            root.iconbitmap(default = 'Rs.ico')
+        except:
+            print("未成功加载图标")
+        root.title("拉曼拟合2.0")
         root.geometry('580x850')
         super().__init__()
         self.filename = tk.StringVar()  # 文件名
         self.df = pd.DataFrame()        # 数据块
+        self.popt = []                  # 参数记录
+        self.popt_list = []             # 绘制总览数据
+        self.help_count = 0             # 帮助手册序号
         self.pack()
         self.init_data()
         self.main_window()
@@ -64,8 +71,8 @@ class verification_window(tk.Frame):
         Now_data_bar.place(x = 50, y = 560)
         Now_data_bar.set(self.Now_data)
         
-        # 读取参数文件按钮
-        return_button = tk.Button(root, text='读取参数文件', command=self.turn_back, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        # 载入参数按钮
+        return_button = tk.Button(root, text='载入参数', command=self.turn_back, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         return_button.place(x=40,y=700)
         # 拟合峰参数按钮
         load_button = tk.Button(root, text='拟合峰参数', command=self.minibox1, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
@@ -74,19 +81,19 @@ class verification_window(tk.Frame):
         dai_button = tk.Button(root, text='绘图参数', command=self.minibox2, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         dai_button.place(x=300,y=700)
         # 保存按钮
-        save_button = tk.Button(root, text='保存当前参数', command=self.save, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        save_button = tk.Button(root, text='保存参数', command=self.save, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         save_button.place(x=430,y=700)
-        # 载入文件数据按钮
-        scatter_button = tk.Button(root, text='载入文件数据', command=self.load_data, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        # 查看当前数据按钮
+        scatter_button = tk.Button(root, text='查看数据', command=self.load_data, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         scatter_button.place(x=40,y=750)
-        # 绘制散点图按钮
-        single_button = tk.Button(root, text='绘制散点图', command=self.plot_statter, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
-        single_button.place(x=170,y=750)
         # 拟合当前按钮
-        setting_button = tk.Button(root, text='拟合当前', command=self.fit_now_data, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        single_button = tk.Button(root, text='拟合', command=self.fit_now_data, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        single_button.place(x=170,y=750)
+        # 记录拟合按钮
+        setting_button = tk.Button(root, text='记录', command=self.record, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         setting_button.place(x=300,y=750)
         # 绘制所有按钮
-        all_button = tk.Button(root, text='绘制总览图', command=self.help, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        all_button = tk.Button(root, text='绘制总览', command=self.overview, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
         all_button.place(x=430,y=750)
         # 退出按钮
         quit_button = tk.Button(root, text='退出', command=self.quit, fg='white', bg='black', activeforeground='white', activebackground='red', width=10, height=1)
@@ -109,23 +116,35 @@ class verification_window(tk.Frame):
     def choose_Now_data(self,V):
         self.Now_data = V
     
-    # 载入数据函数
+    # 查看数据函数
     def load_data(self):
         filename = self.filename.get()+'.csv'
         try:
             self.df = pd.read_csv(filename)
             print("载入成功")
+            print('文件共有%d列\n'%self.df.shape[1])
             print("文件前5行如下：")
             print(self.df.head())
+            print()
+            print("正在尝试绘制散点图.....")
+            x = self.df.iloc[:,int(self.Wave_number)].values
+            y = self.df.iloc[:,int(self.Now_data)].values
+            plt.figure(1)
+            plot_scatter(x,y)
+            print('绘制成功\n')
+            ready_to_show(x)
         except FileNotFoundError:
             print("未找到对应文件\n")
                 
      
-    # 回复上次设定
+    # 载入文件参数
     def turn_back(self):
         file_path = tk.filedialog.askopenfilename(title=u'选择要读取的文件')
-        self.init_data(filename = file_path)
-        self.main_window()
+        if file_path[-4:] != '.npz':
+            messagebox.showinfo(title='提示', message='请选择.pnz后缀的文件')
+        else:
+            self.init_data(filename = file_path)
+            self.main_window()
         
     def init_data(self, filename = 'last.npz'):
         try:
@@ -143,7 +162,7 @@ class verification_window(tk.Frame):
                 self.fit_list_var[i].set(temp[i])
                 self.fit_list[i] = str(temp[i])
         except:
-            self.filename.set('筛选后的数据')
+            self.filename.set('demo')
             self.Gauss_number = 1        # 高斯峰数量
             self.Lorentz_number = 0      # 洛伦兹峰数量
             self.Voigt_number = 0        # voigt峰数量
@@ -237,7 +256,7 @@ class verification_window(tk.Frame):
         top_box2 = tk.Toplevel()
         top_box2.title("绘图参数设置")
         top_box2.geometry('1200x680')
-        info_label8 = tk.Label(top_box2,text='此功能尚未开发！可以在setting.py文件中进行修改',font=('宋体',20)).place(x=40, y=10)
+        info_label8 = tk.Label(top_box2,text='此功能尚未开发！',font=('宋体',20)).place(x=40, y=10)
         
         # 确认按钮
         confirm_button2 = tk.Button(top_box2, text='确认', command=self.confirm2, fg='white', bg='black', activeforeground='white', activebackground='red', width=10, height=1)
@@ -246,21 +265,7 @@ class verification_window(tk.Frame):
         help_button3 = tk.Button(top_box2, text='帮助', command=self.help3, fg='white', bg='black', activeforeground='white', activebackground='green', width=10, height=1)
         help_button3.place(x=850,y=630)
         
-    # 绘制散点图
-    def plot_statter(self):
-        print()
-        try:
-            print("正在尝试绘制散点图.....")
-            filename = self.filename.get()+'.csv'
-            self.df = pd.read_csv(filename)
-            x = self.df.iloc[:,int(self.Wave_number)].values
-            y = self.df.iloc[:,int(self.Now_data)].values
-            plt.figure(1)
-            plot_scatter(x,y)
-            print('绘制成功\n')
-            ready_to_show()
-        except FileNotFoundError:
-            print("未找到对应文件\n")
+
         
     # 拟合当前
     def fit_now_data(self):
@@ -273,27 +278,63 @@ class verification_window(tk.Frame):
             y = self.df.iloc[:,int(self.Now_data)].values
             plt.figure(2)
             plot_scatter(x,y)
-            plot_now_data(x,y,self.Gauss_number, self.Lorentz_number, self.Voigt_number,self.fit_list)
-            ready_to_show()
+            self.popt = plot_now_data(x,y,self.Gauss_number, self.Lorentz_number, self.Voigt_number,self.fit_list)
+            ready_to_show(x)
         except FileNotFoundError:
             print("未找到对应文件\n")
-        
+            
+    # 记录本次拟合
+    def record(self):
+        if len(self.popt):
+            self.popt_list.append(self.popt)
+            messagebox.showinfo(title='提醒', message='记录成功')
+            self.popt = []
+        else:
+            messagebox.showinfo(title='提醒', message='参数已记录或拟合未完成，请再次拟合吧')
+        #print(self.popt_list)
+
+    # 绘制总览
+    def overview(self):
+        if len(self.popt_list) == 0:
+            messagebox.showinfo(title='提醒', message='至少先记录一次数据吧(*_*)')
+        else:
+            print("正在尝试绘制....")
+            filename = self.filename.get()+'.csv'
+            self.df = pd.read_csv(filename)
+            x = self.df.iloc[:,int(self.Wave_number)].values
+            plt.figure(3)
+            plot_overview(x,self.popt_list)
+            ready_to_show(x)
+            
     # 帮助文档
     def help(self):
-        messagebox.showinfo(title='help', message='哈哈，你被骗了！我并不能给你帮助')
-        
-
+        if self.help_count == 0:
+            messagebox.showinfo(title='帮助', message='0.多次点击本按钮会给不同的提示')
+            self.help_count += 1
+        elif self.help_count == 1:
+            messagebox.showinfo(title='帮助', message='1.在demo中可以尝试随意点击按钮')
+            self.help_count += 1
+        elif self.help_count == 2:
+            messagebox.showinfo(title='帮助', message='2.数据文件要求UTF-8格式保存的CSV文件')
+            self.help_count += 1
+        elif self.help_count == 3:
+            messagebox.showinfo(title='帮助', message='3.文件名在最上面的输入框输入，不需要输入后缀')
+            self.help_count += 1
+        elif self.help_count == 4:
+            messagebox.showinfo(title='帮助', message='4.多次点击记录就可以使用绘制总览查看合图')
+            self.help_count = 0
+            
     # 帮助文档2--拟合峰的详细参数设定
     def help2(self):
-        #messagebox.showinfo(title='help', message='现在啥也没有')
         print("该窗口左侧显示3个峰的数量。")
         print("注意参数不要超出该数目。\n")
         print("每个峰会有4个参数（偏置，幅值，中心位置，半高宽）\n\
 在该窗口可以设置每个峰的拟合范围（最大值和最小值）\n")
-        print("您可以先通过点击“绘制散点图”\
+        print("您可以先通过点击“查看数据”\
 按钮大致观察峰存在的范围然后依次输入。\n")
         print("如果拟合曲线有多个相同峰，如4个高斯峰，\n\
-则在Gauss输入框中按顺序写下4个峰的参数，中间用英文逗号分割。\n")
+则在Gauss输入框中按顺序写下4个峰的参数，中间用英文逗号分隔。\n")
+        messagebox.showinfo(title='帮助', message='看控制台(￣▽￣)')
         
     # 帮助文档3--绘图的详细参数设定
     def help3(self):
@@ -312,12 +353,13 @@ class verification_window(tk.Frame):
     def save(self):
         save_name = tk.filedialog.asksaveasfilename(title=u'保存参数')
         if save_name == '':
-            print("未成功保存")
+            messagebox.showinfo(title='提示', message='未保存成功')
             return 0
-        save_name += '.npz'
+        if save_name[-4:] != '.npz': 
+            save_name += '.npz'
         save_list = [self.filename.get(), self.Gauss_number, self.Lorentz_number, self.Voigt_number, self.Wave_number, self.Now_data]
         np.savez(save_name, save_list, self.fit_list)
-        print("保存成功")
+        messagebox.showinfo(title='提示', message='保存成功')
     
     #退出子窗口
     def confirm(self):
@@ -335,5 +377,4 @@ class verification_window(tk.Frame):
         
 if __name__ == '__main__':
     input_para = verification_window()
-    #print(input_para.filename.get())
     

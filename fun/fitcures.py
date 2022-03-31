@@ -18,7 +18,7 @@ def Voigt(x, y0, amp, pos, fwhm, shape = 1):
 # temp和p是参数，每个峰有4个参数
 def fit_function(x,g,l,v,temp,*p):
     y = 0
-    if isinstance(temp,str):
+    if temp == 'none':
         p = list(p[0])
     else:
         p = list(p)

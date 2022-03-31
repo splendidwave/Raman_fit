@@ -17,3 +17,7 @@ fit_subline_width = [[3.0],\
 fit_subline_style = [[':'],\
                      [':'],\
                      [':']]
+
+# x轴输入
+x_label = 'wavenumber'
+y_label = 'intensity(arb.units)'
