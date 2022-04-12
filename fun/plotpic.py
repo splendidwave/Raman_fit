@@ -3,11 +3,35 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.pyplot import MultipleLocator
 from fitcures import *
-from setting import *
 
 
-def plot_scatter(x,st):
-    plt.scatter(x, st, alpha=0.8,s=13,color=scatter_color)
+# 图片颜色设置
+scatter_color = 'midnightblue'
+scatter_size = 13
+fit_line_color = ['#2878b5']
+fit_line_width = 4.0
+# 子峰 三个列表代表三个类型的峰
+# 颜色
+fit_subline_color = [['#9ac9db','#f8ac8c','#ff8884','mediumpurple'],\
+                     ['#9ac9db','#f8ac8c','#ff8884','mediumpurple'],\
+                     ['#9ac9db','#f8ac8c','#ff8884','mediumpurple']]
+# 线宽
+fit_subline_width = [[3.0],\
+                     [3.0],\
+                     [3.0]]
+# 样式
+fit_subline_style = [[':'],\
+                     [':'],\
+                     [':']]
+# x轴输入
+x_label = 'wavenumber'
+y_label = 'intensity(arb.units)'
+
+style = [fit_line_width,fit_line_color,fit_subline_width,fit_subline_color,fit_subline_style]
+
+
+def plot_scatter(x,st,scatter_size = scatter_size, scatter_color = scatter_color):
+    plt.scatter(x, st, alpha=0.8,s=scatter_size,color=scatter_color)
 
 def show_the_fen(g,l,v,popt):
     #y01,a1,p1,f1,y02,a2,p2,f2,y03,a3,xc3,w3,y04,a4,xc4,w4 = popt
@@ -27,10 +51,11 @@ def show_the_fen(g,l,v,popt):
     
 
 # 拟合曲线绘制
-def plot_fit_line(x,g,l,v,popt,sub = True):
+def plot_fit_line(x,g,l,v,popt,sub = True, style = style, number = 0):
+    fit_line_width,fit_line_color,fit_subline_width,fit_subline_color,fit_subline_style = style
     xfit = np.linspace(x.min(),x.max(),5000)
     yfit = fit_function(xfit,g,l,v,'none',popt)
-    plt.plot(xfit,yfit,linewidth=fit_line_width,color = fit_line_color)
+    plt.plot(xfit,yfit,linewidth=fit_line_width,color = fit_line_color[number%len(fit_line_color)])
     # 绘制分峰
     if sub:
         y00 = 0
@@ -53,7 +78,10 @@ def plot_fit_line(x,g,l,v,popt,sub = True):
                      color=fit_subline_color[2][i%len(fit_subline_color[2])])
     return max(yfit) - min(yfit)*0.9
 
-def ready_to_show(x):
+
+
+
+def ready_to_show(x,x_label = x_label ,y_label = y_label):
     #(x.max() - x.min())/10
     x_major_locator=MultipleLocator((x.max() - x.min())/10)#准备刻度
     #标签

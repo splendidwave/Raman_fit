@@ -18,7 +18,7 @@ class verification_window(tk.Frame):
             root.iconbitmap(default = 'Rs.ico')
         except:
             print("未成功加载图标")
-        root.title("拉曼拟合2.0")
+        root.title("拉曼拟合2.1")
         root.geometry('580x850')
         super().__init__()
         self.filename = tk.StringVar()  # 文件名
@@ -40,6 +40,9 @@ class verification_window(tk.Frame):
         # 文件名行
         filename_label = tk.Label(root,text='1.文件名:',font=('宋体',12)).place(x=50, y=70)
         filename_entry = tk.Entry(root,textvariable=self.filename).place(x=180, y = 70)
+        # 选择文件按钮
+        choose_button = tk.Button(root, text='选择文件', command=self.choosefile, fg='black', bg='white', activeforeground='white', activebackground='black', width=10, height=1)
+        choose_button.place(x=400,y=65)
 
         # 高斯峰数量选择
         Gauss_number_bar_label = tk.Label(root,text='2.选择 Gauss 峰数量:',font=('宋体',12)).place(x=50, y=120)
@@ -102,6 +105,12 @@ class verification_window(tk.Frame):
         help_button = tk.Button(root, text='帮助', command=self.help, fg='white', bg='black', activeforeground='white', activebackground='green', width=10, height=1)
         help_button.place(x=20,y=800)
 
+    # 选择文件按键
+    def choosefile(self):
+        filepath = tk.filedialog.askopenfilename(title=u'选择文件')
+        self.filename.set(filepath[:-4])
+        self.main_window()
+
     # 改变三个峰的条
     def choose_Gauss_number(self,V):
         self.Gauss_number = V
@@ -130,9 +139,9 @@ class verification_window(tk.Frame):
             x = self.df.iloc[:,int(self.Wave_number)].values
             y = self.df.iloc[:,int(self.Now_data)].values
             plt.figure(1)
-            plot_scatter(x,y)
+            plot_scatter(x,y,scatter_size = self.scatter[1], scatter_color = self.scatter[0])
             print('绘制成功\n')
-            ready_to_show(x)
+            ready_to_show(x,x_label = self.label[0] ,y_label = self.label[1])
         except FileNotFoundError:
             print("未找到对应文件\n")
                 
@@ -161,6 +170,26 @@ class verification_window(tk.Frame):
             for i in range(24):
                 self.fit_list_var[i].set(temp[i])
                 self.fit_list[i] = str(temp[i])
+            # 读取画图参数设定
+            temp = last_data['arr_2']
+            self.label = eval(temp[0])
+            self.scatter = eval(temp[1])
+            self.sub = eval(temp[2])
+            self.style = eval(temp[3])
+            self.setting_var = [tk.StringVar() for i in range(15)]  # 设置参数框
+            self.sub_var = tk.StringVar()           #设置选框
+            self.sub_var.set(str(self.sub))
+            # 赋值
+            self.setting_var[0].set(str(self.label[0]))
+            self.setting_var[1].set(str(self.label[1]))
+            self.setting_var[2].set(str(self.scatter[0]))
+            self.setting_var[3].set(str(self.scatter[1]))
+            for i in range(2):
+                self.setting_var[4+i].set(str(self.style[i]))
+            for i in range(3):
+                self.setting_var[6+i].set(str(self.style[2][i]))
+                self.setting_var[9+i].set(str(self.style[3][i]))
+                self.setting_var[12+i].set(str(self.style[4][i]))
         except:
             self.filename.set('demo')
             self.Gauss_number = 1        # 高斯峰数量
@@ -169,10 +198,27 @@ class verification_window(tk.Frame):
             self.Wave_number = 0         # 波数的位置
             self.Now_data = 1            # 当前数据列
             self.fit_list = ['' for i in range(24)] #峰的参数
-            self.fit_list_var = [tk.StringVar() for i in range(24)]
+            self.fit_list_var = [tk.StringVar() for i in range(24)] # 拟合参数框
             for i in range(24):
                 self.fit_list_var[i].set(self.fit_list[i])
-                
+            # 读取画图参数设定
+            self.setting_var = [tk.StringVar() for i in range(15)]  # 设置参数框
+            self.sub_var = tk.StringVar()           #设置选框
+            self.sub_var.set('True')
+            self.sub = True                     #设置子峰
+            self.style = style
+            self.label = ['wavenumber','intensity(arb.units)'] # xy标签
+            self.setting_var[0].set(str(self.label[0]))
+            self.setting_var[1].set(str(self.label[1]))
+            self.scatter = [scatter_color,scatter_size]        # 散点参数
+            self.setting_var[2].set(str(self.scatter[0]))
+            self.setting_var[3].set(str(self.scatter[1]))
+            for i in range(2):
+                self.setting_var[4+i].set(str(self.style[i]))
+            for i in range(3):
+                self.setting_var[6+i].set(str(self.style[2][i]))
+                self.setting_var[9+i].set(str(self.style[3][i]))
+                self.setting_var[12+i].set(str(self.style[4][i]))
 
     # 设置拟合峰参数 !！子窗口
     def minibox1(self):
@@ -256,8 +302,50 @@ class verification_window(tk.Frame):
         top_box2 = tk.Toplevel()
         top_box2.title("绘图参数设置")
         top_box2.geometry('1200x680')
-        info_label8 = tk.Label(top_box2,text='此功能尚未开发！',font=('宋体',20)).place(x=40, y=10)
+        top_box2.resizable(width=False, height=False)
+        #info_label8 = tk.Label(top_box2,text='此功能正在未开发！',font=('宋体',20)).place(x=40, y=10)
+        # xy标签
+        tk.Label(top_box2,text='x轴标签:',font=('宋体',10)).place(x=100, y=10)
+        tk.Entry(top_box2,textvariable=self.setting_var[0]).place(x=50, y=35)
+        tk.Label(top_box2,text='y轴标签:',font=('宋体',10)).place(x=400, y=10)
+        tk.Entry(top_box2,textvariable=self.setting_var[1]).place(x=350, y=35)
+
+        # 散点设置
+        tk.Label(top_box2,text='散点颜色:',font=('宋体',10)).place(x=700, y=10)
+        tk.Entry(top_box2,textvariable=self.setting_var[2]).place(x=650, y=35)
+        tk.Label(top_box2,text='散点大小:',font=('宋体',10)).place(x=1000, y=10)
+        tk.Entry(top_box2,textvariable=self.setting_var[3]).place(x=950, y=35)
+
+        # 峰设置参数
+        # 标签
+        tk.Label(top_box2,text='主拟合线',font=('宋体',18)).place(x=50, y=200)
+        tk.Label(top_box2,text='子\n峰',font=('宋体',18)).place(x=50, y=390)
+        tk.Label(top_box2,text='Gauss峰:',font=('宋体',12)).place(x=110, y=300)
+        tk.Label(top_box2,text='Lorentz峰:',font=('宋体',12)).place(x=100, y=400)
+        tk.Label(top_box2,text='Voigt峰:',font=('宋体',12)).place(x=110, y=500)
+        tk.Label(top_box2,text='粗细',font=('宋体',16)).place(x=400, y=120)
+        tk.Label(top_box2,text='颜色',font=('宋体',16)).place(x=700, y=120)
+        tk.Label(top_box2,text='线型',font=('宋体',16)).place(x=1000, y=120)
+        # 输入框
+        tk.Entry(top_box2,textvariable=self.setting_var[4]).place(x=350, y=210)
+        tk.Entry(top_box2,textvariable=self.setting_var[5]).place(x=650, y=210)
         
+        tk.Entry(top_box2,textvariable=self.setting_var[6]).place(x=350, y=300)
+        tk.Entry(top_box2,textvariable=self.setting_var[9]).place(x=650, y=300)
+        tk.Entry(top_box2,textvariable=self.setting_var[12]).place(x=950, y=300)
+
+        tk.Entry(top_box2,textvariable=self.setting_var[7]).place(x=350, y=400)
+        tk.Entry(top_box2,textvariable=self.setting_var[10]).place(x=650, y=400)
+        tk.Entry(top_box2,textvariable=self.setting_var[13]).place(x=950, y=400)
+
+        tk.Entry(top_box2,textvariable=self.setting_var[8]).place(x=350, y=500)
+        tk.Entry(top_box2,textvariable=self.setting_var[11]).place(x=650, y=500)
+        tk.Entry(top_box2,textvariable=self.setting_var[14]).place(x=950, y=500)
+
+        # 子峰
+        C1 = tk.Checkbutton(top_box2,variable = self.sub_var, \
+                onvalue = 'True', offvalue = 'False').place(x=10,y=410)
+
         # 确认按钮
         confirm_button2 = tk.Button(top_box2, text='确认', command=self.confirm2, fg='white', bg='black', activeforeground='white', activebackground='red', width=10, height=1)
         confirm_button2.place(x=1000,y=630)
@@ -277,9 +365,10 @@ class verification_window(tk.Frame):
             x = self.df.iloc[:,int(self.Wave_number)].values
             y = self.df.iloc[:,int(self.Now_data)].values
             plt.figure(2)
-            plot_scatter(x,y)
-            self.popt = plot_now_data(x,y,self.Gauss_number, self.Lorentz_number, self.Voigt_number,self.fit_list)
-            ready_to_show(x)
+            plot_scatter(x,y,scatter_size = self.scatter[1], scatter_color = self.scatter[0])
+            self.popt = plot_now_data(x,y,self.Gauss_number, self.Lorentz_number, self.Voigt_number,self.fit_list,\
+                sub = self.sub, style = self.style)
+            ready_to_show(x,x_label = self.label[0] ,y_label = self.label[1])
         except FileNotFoundError:
             print("未找到对应文件\n")
             
@@ -303,8 +392,8 @@ class verification_window(tk.Frame):
             self.df = pd.read_csv(filename)
             x = self.df.iloc[:,int(self.Wave_number)].values
             plt.figure(3)
-            plot_overview(x,self.popt_list)
-            ready_to_show(x)
+            plot_overview(x,self.popt_list,sub = self.sub, style = self.style)
+            ready_to_show(x,x_label = self.label[0] ,y_label = self.label[1])
             
     # 帮助文档
     def help(self):
@@ -338,7 +427,7 @@ class verification_window(tk.Frame):
         
     # 帮助文档3--绘图的详细参数设定
     def help3(self):
-        messagebox.showinfo(title='help', message='现在啥也没有')
+        messagebox.showinfo(title='help', message='按python格式输入，用列表')
         
     # 退出
     def quit(self):
@@ -346,7 +435,8 @@ class verification_window(tk.Frame):
         if messagebox.askquestion(title='退出', message='是否记录本次参数'):
             save_name = 'last.npz'
             save_list = [self.filename.get(), self.Gauss_number, self.Lorentz_number, self.Voigt_number, self.Wave_number, self.Now_data]
-            np.savez(save_name, save_list, self.fit_list)
+            save_setting = [str(self.label),str(self.scatter),str(self.sub),str(self.style)]
+            np.savez(save_name, save_list, self.fit_list, save_setting)
         root.destroy()
         
     # 保存参数
@@ -358,10 +448,11 @@ class verification_window(tk.Frame):
         if save_name[-4:] != '.npz': 
             save_name += '.npz'
         save_list = [self.filename.get(), self.Gauss_number, self.Lorentz_number, self.Voigt_number, self.Wave_number, self.Now_data]
-        np.savez(save_name, save_list, self.fit_list)
+        save_setting = [str(self.label),str(self.scatter),str(self.sub),str(self.style)]
+        np.savez(save_name, save_list, self.fit_list, save_setting)
         messagebox.showinfo(title='提示', message='保存成功')
     
-    #退出子窗口
+    #退出子窗口1
     def confirm(self):
         global top_box
         for i in range(24):
@@ -371,7 +462,14 @@ class verification_window(tk.Frame):
     #退出子窗口2
     def confirm2(self):
         global top_box2
-        
+        self.label = [self.setting_var[0].get(),self.setting_var[1].get()]
+        self.scatter = [self.setting_var[2].get(),eval(self.setting_var[3].get())]
+        self.style[0] = eval(self.setting_var[4].get())
+        self.style[1] = eval(self.setting_var[5].get())
+        self.style[2] = [eval(self.setting_var[6].get()),eval(self.setting_var[7].get()),eval(self.setting_var[8].get())]
+        self.style[3] = [eval(self.setting_var[9].get()),eval(self.setting_var[10].get()),eval(self.setting_var[11].get())]
+        self.style[4] = [eval(self.setting_var[12].get()),eval(self.setting_var[13].get()),eval(self.setting_var[14].get())]
+        self.sub = eval(self.sub_var.get())
         top_box2.destroy()
 
         

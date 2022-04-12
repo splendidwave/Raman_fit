@@ -1,8 +1,4 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-import time
 from fitcures import *
 from plotpic import *
 
@@ -50,7 +46,7 @@ def fit_para_split(g,l,v,fit_list):
     return fit_lower_bound,fit_upper_bound
 
 
-def plot_now_data(x,y,g,l,v,fit_list):
+def plot_now_data(x,y,g,l,v,fit_list,sub = True, style = style):
     g,l,v = map(int,[g,l,v])
     fit_lower_bound,fit_upper_bound = fit_para_split(g,l,v,fit_list)
     if fit_lower_bound == "格式":
@@ -60,15 +56,16 @@ def plot_now_data(x,y,g,l,v,fit_list):
             popt,pcov = curve_fit(lambda x,temp,*p: fit_function(x,g,l,v,temp,*p),x,y,\
             bounds =(fit_lower_bound,fit_upper_bound))
 
-            plot_fit_line(x,g,l,v,popt)
+            plot_fit_line(x,g,l,v,popt,sub = sub, style = style)
             show_the_fen(g,l,v,popt)
             return [popt,g,l,v]
         except RuntimeError:
             print('拟合超时,请检查参数设置是否合理')
             
-def plot_overview(x,popt_list):
+def plot_overview(x,popt_list,sub,style):
     temp = 0
     for i in range(len(popt_list)):
         popt_c = popt_list[i][0].copy()
         popt_c[0] += temp 
-        temp += plot_fit_line(x,popt_list[i][1],popt_list[i][2],popt_list[i][3],popt_c)
+        temp += plot_fit_line(x,popt_list[i][1],popt_list[i][2],popt_list[i][3],popt_c,\
+            sub = sub, style = style, number = i)
