@@ -1,5 +1,7 @@
 # 基于python的拉曼多峰拟合画图程序
 
+exe中没有提供demo的数据
+
 ## 0.主界面介绍
 
 <div align="center">
@@ -38,7 +40,7 @@
 使用excel另存为一下就可以满足条件。
 
 <div align="center">
-    <img src="数据演示.png" width = "450" height = "240" alt="输入文件样式"></img>
+    <img src="img/数据演示.png" width = "450" height = "240" alt="输入文件样式"></img>
 </div>
 
 
@@ -75,7 +77,7 @@
 点击该按钮会弹出一个子窗口，如下
 
 <div align="center">
-    <img src="拟合峰窗口.png" alt="拟合参数设置窗口"></img>
+    <img src="img/拟合峰窗口.png" alt="拟合参数设置窗口"></img>
 </div>
 
 该窗口左侧显示3个峰的数量。注意参数不要超出该数目。
@@ -94,7 +96,7 @@
 ### 2.3 “绘图参数”按钮
 
 <div align="center">
-    <img src="绘图参数窗口.png" alt="绘图参数设置窗口"></img>
+    <img src="img/绘图参数窗口.png" alt="绘图参数设置窗口"></img>
 </div>
 
 主要按照python绘图规则输入参数。子峰前面的复选框取消勾选就不会绘制子峰。具体配置参看[使用python进行科研绘图](https://splendidwave.github.io/2022/01/30/2022-1/%E4%BD%BF%E7%94%A8python%E8%BF%9B%E8%A1%8C%E7%A7%91%E7%A0%94%E7%BB%98%E5%9B%BE/).
@@ -114,7 +116,7 @@
 最后会根据参数5、6绘制散点图。
 
 <div align="center">
-    <img src="查看数据.png" alt="查看数据"></img>
+    <img src="img/查看数据.png" alt="查看数据"></img>
 </div>
 
 ### 2.6 “拟合”按钮
@@ -122,7 +124,7 @@
 点击该按钮会根据所有参数进行数据拟合并显示图片。
 
 <div align="center">
-    <img src="拟合.png" alt="拟合"></img>
+    <img src="img/拟合.png" alt="拟合"></img>
 </div>
 
 ### 2.7 “记录”按钮
@@ -136,7 +138,7 @@
 点击该按钮会将临时记录的数据绘制在一张图中。
 
 <div align="center">
-    <img src="绘制总览.png" alt="绘制总览（只记录了两个数据）"></img>
+    <img src="img/绘制总览.png" alt="绘制总览（只记录了两个数据）"></img>
 </div>
 
 ## 3.三个其他按钮
