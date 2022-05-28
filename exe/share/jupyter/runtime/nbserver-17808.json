@@ -1,0 +1,12 @@
+{
+  "base_url": "/",
+  "hostname": "localhost",
+  "notebook_dir": "D:\\jupyter",
+  "password": false,
+  "pid": 17808,
+  "port": 8888,
+  "secure": false,
+  "sock": "",
+  "token": "96e4988ec4e9244d5472205439dfbbacade3ee58f9a1e0b5",
+  "url": "http://localhost:8888/"
+}
