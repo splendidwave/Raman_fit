@@ -1,10 +1,9 @@
 # 基于python的拉曼多峰拟合画图程序
-https://splendidwave.github.io/2022/04/11/2022-4/%E6%8B%89%E6%9B%BC%E5%85%89%E8%B0%B1%E5%A4%9A%E5%B3%B0%E6%8B%9F%E5%90%88%E7%A8%8B%E5%BA%8F2.1%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/#more
 
 ## 0.主界面介绍
 
 <div align="center">
-    <img src="界面.png" width = "580" height = "850" alt="界面"></img>
+    <img src="img/界面.png" width = "580" height = "850" alt="界面"></img>
 </div>
 
 主界面一共有6个可调节参数：
